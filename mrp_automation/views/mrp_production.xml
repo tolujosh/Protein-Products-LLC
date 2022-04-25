@@ -10,15 +10,15 @@
             <field name="tracking" invisible="1"/>
         </xpath>
         
-            <xpath expr="//header" position="inside">
-                <field name="is_visible" invisible="1"/>
-                    <button name="button_auto_confirmation"
-                        attrs="{'invisible': ['|', '|', ('tracking', '!=', 'serial'), ('state', '!=', 'done'),('is_visible', '=', True)]}" string="Generate Productions" 
-                        icon="fa-gears"
-                        type="object" 
-                        class="oe_highlight" 
-                        data-hotkey="v"/>
-            </xpath>
+        <xpath expr="//header" position="inside">
+            <field name="is_visible" invisible="1"/>
+            <button name="button_auto_generation"
+                attrs="{'invisible': ['|', '|', ('tracking', '!=', 'serial'), ('state', '!=', 'confirmed'),('is_visible', '=', True)]}" string="Generate Productions" 
+                icon="fa-gears"
+                type="object" 
+                class="oe_highlight" 
+                data-hotkey="v"/>
+        </xpath>
         </field>
     </record>
 </odoo>

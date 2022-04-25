@@ -17,6 +17,20 @@ class ExtendMrpProduction(models.Model):
         readonly=True,
         store=True)
 
+    
+    def generate_production_lot(self, product):
+        company_id = self.env.company
+        production_lot = self.env['stock.production.lot'].create({
+        'product_id': product.id,
+        'company_id': company_id.id,
+        'name': self.env['stock.production.lot']._get_next_serial(company_id, product) or self.env['ir.sequence'].next_by_code('stock.lot.serial')})
+        return production_lot
+          
+    def generate_bom_serial_numbers(self):
+        for raw in self.move_raw_ids:
+            for _ in range(int(raw.product_uom_qty)):
+                production_lot =  self.generate_production_lot(product=raw.product_id)
+                raw.write({'lot_ids':[(6, 0,[production_lot.id])]})
 
     def _action_generate_backorder_wizard(self, quantity_issues):
         ctx = self.env.context.copy()
@@ -134,3 +148,16 @@ class ExtendMrpProduction(models.Model):
                         order._action_generate_immediate_wizard()
                         order.sudo().button_mark_done()
         self.is_visible = True
+
+    def button_auto_generation(self):
+        self.automation_qty = self.product_qty
+        raw = self.move_raw_ids.filtered(lambda i: i.product_id.tracking == 'none')
+        if len(raw) > 0:
+            for _ in range(self.automation_qty):
+                for order in self.procurement_group_id.mrp_production_ids:
+                    if order.state != 'done':
+                        order.generate_bom_serial_numbers()
+                        order.sudo().action_generate_serial()
+                        order.sudo().button_mark_done()
+        else:
+            self.button_auto_confirmation()
