@@ -163,6 +163,7 @@ class ExtendMrpProduction(models.Model):
             self.button_auto_confirmation()
 
     def automate_mark_done(self):
+        self.automation_qty = self.product_qty
         for _ in range(self.automation_qty):
             for order in self.procurement_group_id.mrp_production_ids:
                 if order.state != 'done':
