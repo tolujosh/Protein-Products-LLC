@@ -162,6 +162,12 @@ class ExtendMrpProduction(models.Model):
         else:
             self.button_auto_confirmation()
 
+    def automate_mark_done(self):
+        for _ in range(self.automation_qty):
+            for order in self.procurement_group_id.mrp_production_ids:
+                if order.state != 'done':
+                    order.sudo().button_mark_done()
+                    
     def button_mass_generation(self):
         action = self.action_serial_mass_produce_wizard()
         wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
@@ -170,3 +176,6 @@ class ExtendMrpProduction(models.Model):
         # Reload the wizard to apply generated serial numbers
         wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
         wizard.save().apply()
+        self.automate_mark_done()
+
+    
