@@ -3,6 +3,7 @@ from odoo.tests import Form
 from odoo.tools import float_compare, float_round, float_is_zero, format_datetime
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import OrderedSet, format_date
+from collections import defaultdict
 
 
 class ExtendMrpProduction(models.Model):
