@@ -369,10 +369,13 @@ class ExtendMrpProduction(models.Model):
         action = self.action_serial_mass_produce_wizard()
         wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
         # Let the wizard generate all serial numbers
+        count = self.product_qty
+        wizard.next_serial_number = f"{self.name}#1"
+        wizard.next_serial_count = count - 1
         action = wizard.save().generate_serial_numbers_production()
         # Reload the wizard to apply generated serial numbers
         wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
-        wizard.save().apply()
+        wizard.save().create_backorder()
         self.automate_mark_done()
 
 
