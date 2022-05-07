@@ -176,7 +176,7 @@ class ExtendMrpProduction(models.Model):
         action = wizard.save().generate_serial_numbers_production()
         # Reload the wizard to apply generated serial numbers
         wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
-        wizard.save().apply()
+        wizard.save().create_backorder()
         self.automate_mark_done()
 
     
