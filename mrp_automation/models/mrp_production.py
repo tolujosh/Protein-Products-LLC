@@ -375,4 +375,13 @@ class ExtendMrpProduction(models.Model):
         wizard.save().create_backorder()
         self.automate_mark_done()
 
-    
+
+from odoo import api, fields, models
+
+
+class ExtendStockMove(models.Model):
+    _inherit = 'stock.move'
+
+    def _should_bypass_reservation(self, forced_location=False):
+        location = forced_location or self.location_id
+        return location.should_bypass_reservation() or self.product_id.type != 'product'
