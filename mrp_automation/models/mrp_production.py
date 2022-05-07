@@ -170,13 +170,14 @@ class ExtendMrpProduction(models.Model):
                     order.sudo().button_mark_done()
                     
     def button_mass_generation(self):
-        action = self.action_serial_mass_produce_wizard()
-        wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
-        # Let the wizard generate all serial numbers
-        action = wizard.save().generate_serial_numbers_production()
-        # Reload the wizard to apply generated serial numbers
-        wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
-        wizard.save().apply()
+        for i in self:
+            action = i.action_serial_mass_produce_wizard()
+            wizard = Form(self.env['stock.assign.serial'].with_context(**action['context']))
+            # Let the wizard generate all serial numbers
+            action = wizard.save().generate_serial_numbers_production()
+            # Reload the wizard to apply generated serial numbers
+            wizard = Form(self.env['stock.assign.serial'].browse(action['res_id']))
+            wizard.save().apply()
         self.automate_mark_done()
 
     
