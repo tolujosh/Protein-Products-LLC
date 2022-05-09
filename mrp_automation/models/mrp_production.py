@@ -360,13 +360,14 @@ class ExtendMrpProduction(models.Model):
         for _ in range(self.automation_qty):
             for order in self.procurement_group_id.mrp_production_ids:
                 if order.state != 'done':
-                    order.action_generate_move_line_serial_numbers()
+                    # order.action_generate_move_line_serial_numbers()
                     order.sudo().button_mark_done()
                
     def action_generate_move_line_serial_numbers(self):
         for line in self.move_raw_ids:
             move = self.env['stock.move'].browse(line.id)
-            move.auto_generate_move_line_sequence()
+            # move.auto_generate_move_line_sequence()
+
     
 
 class ExtendStockMove(models.Model):
@@ -381,7 +382,6 @@ class ExtendStockMove(models.Model):
         for i in self.move_line_ids:
             count+=1
             if count < qty + 1:
-                print("=count==\n\n",count)
                 i.lot_id = self.env['stock.production.lot'].create({'name':f'{self.raw_material_production_id.name}#{count}',
                                                                     'product_id':i.product_id.id,
                                                                 'company_id':self.env.company.id})
