@@ -2,6 +2,8 @@ from odoo import fields, models, api, _
 from odoo.tests import Form
 from odoo.tools import float_compare, float_round, float_is_zero, format_datetime
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.misc import OrderedSet, format_date
+from collections import defaultdict
 
 
 class ExtendMrpProduction(models.Model):
@@ -153,3 +155,50 @@ class ExtendMrpProduction(models.Model):
                         order._action_generate_immediate_wizard()
                         order.sudo().button_mark_done()
         self.is_visible = True
+
+    def button_auto_generation(self):
+        self.automation_qty = self.product_qty
+        raw = self.move_raw_ids.filtered(lambda i: i.product_id.tracking == 'none')
+        if len(raw) > 0:
+            for _ in range(self.automation_qty):
+                for order in self.procurement_group_id.mrp_production_ids:
+                    if order.state != 'done':
+                        order.generate_bom_serial_numbers()
+                        order.sudo().action_generate_serial()
+                        order.sudo().button_mark_done()
+        else:
+            self.button_auto_confirmation()
+
+    def automate_mark_done(self):
+        self.automation_qty = self.product_qty
+        for _ in range(self.automation_qty):
+            for order in self.procurement_group_id.mrp_production_ids:
+                if order.state != 'done':
+                    # order.action_generate_move_line_serial_numbers()
+                    order.sudo().button_mark_done()
+               
+    def action_generate_move_line_serial_numbers(self):
+        for line in self.move_raw_ids:
+            move = self.env['stock.move'].browse(line.id)
+            # move.auto_generate_move_line_sequence()
+
+    
+
+class ExtendStockMove(models.Model):
+    _inherit = 'stock.move'
+
+
+    def auto_generate_move_line_sequence(self):
+        count = 0
+        to_consume_qty = self.raw_material_production_id.product_qty
+        ordered_qty = self.product_uom_qty
+        qty = ordered_qty / to_consume_qty
+        for i in self.move_line_ids:
+            count+=1
+            if count < qty + 1:
+                i.lot_id = self.env['stock.production.lot'].create({'name':f'{self.raw_material_production_id.name}#{count}',
+                                                                    'product_id':i.product_id.id,
+                                                                'company_id':self.env.company.id})
+                i.qty_done = 1
+                self.quantity_done = count
+            

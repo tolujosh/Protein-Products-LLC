@@ -4,7 +4,7 @@
     "author": "Mohamed Elmojtaba",
     "category": "MRP",
     "version": "0.1",
-    "depends": ['mrp'],
+    "depends": ['mrp','stock'],
     "data": [
         "views/mrp_production.xml",
     ],

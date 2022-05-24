@@ -5,19 +5,30 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
-        
-        <xpath expr="//field[@name='product_id']" position="after">
-            <field name="tracking" invisible="1"/>
-        </xpath>
-        
-            <xpath expr="//button[@name='action_confirm']" position="after">
+
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="tracking" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
                 <field name="is_visible" invisible="1"/>
-                    <button name="button_auto_confirmation"
-                        attrs="{'invisible': ['|', '|', ('tracking', '!=', 'serial'), ('state', '!=', 'done'),('is_visible', '=', True)]}" string="Generate Productions" 
-                        icon="fa-gears"
+                
+                <button name="automate_mark_done" 
+                        string="Generate Productions" 
+                        icon="fa-gears" 
                         type="object" 
                         class="oe_highlight" 
+                        states="to_close" 
                         data-hotkey="v"/>
+
+                <button name="action_serial_mass_produce_wizard" 
+                        string="Generate Serial Numbers" 
+                        icon="fa-gears" 
+                        type="object" 
+                        attrs="{'invisible': ['|', '|', ('tracking', '!=', 'serial'), 
+                                                        ('state', '!=', 'confirmed'),
+                                                        ('is_visible', '=', True)]}"  
+                        class="oe_highlight"/>
             </xpath>
         </field>
     </record>
