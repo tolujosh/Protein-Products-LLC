@@ -18,6 +18,25 @@ class ExtendMrpProduction(models.Model):
         store=True)
 
 
+    def action_serial_mass_produce_wizard(self):
+        self.ensure_one()
+        self._check_company()
+        if self.state != 'confirmed':
+            return
+        if self.product_id.tracking != 'serial':
+            return
+        
+        
+        next_serial = self.env['stock.production.lot']._get_next_serial(self.company_id, self.product_id)
+        action = self.env["ir.actions.actions"]._for_xml_id("mrp.act_assign_serial_numbers_production")
+        action['context'] = {
+            'default_production_id': self.id,
+            'default_expected_qty': self.product_qty,
+            'default_next_serial_number': next_serial,
+            'default_next_serial_count': self.product_qty - self.qty_produced,
+        }
+        return action
+    
     def _action_generate_backorder_wizard(self, quantity_issues):
         ctx = self.env.context.copy()
         lines = []
